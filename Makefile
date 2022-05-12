@@ -105,7 +105,12 @@ unit-test: vendor ## Run PhpUnit unit testsuite
 	@$(call log_success,Done)
 
 .PHONY: func-test
-func-test: var/docker.up ## Run PhpUnit functionnal testsuite
+func-test: var/docker.up ## Run PhpUnit functional testsuite
 	@$(call log,Running ...)
 	$(PHP_EXEC) bin/phpunit -v --testsuite func --testdox
 	@$(call log_success,Done)
+
+.PHONY: phpstan
+phpstan: var/docker.up ## Run PHPStan static analysis (Use with path=path/to/file to restrict the scope)
+	@$(call log,Static analysis ...)
+	@$(PHP_RUN) vendor/bin/phpstan analyse -c phpstan.neon $(path)
