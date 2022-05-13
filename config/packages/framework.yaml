@@ -17,6 +17,13 @@ framework:
     php_errors:
         log: true
 
+    http_client:
+        scoped_clients:
+            github.client:
+                base_uri: 'https://data.gharchive.org'
+                headers:
+                    Accept: 'application/gzip'
+
 when@test:
     framework:
         test: true
