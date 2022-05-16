@@ -6,15 +6,9 @@ use Symfony\Component\Validator\Constraints as Assert;
 
 class SearchInput
 {
-    /**
-     * @var \DateTimeImmutable
-     * @Assert\NotNull())
-     */
+    #[Assert\NotNull]
     public \DateTimeImmutable $date;
 
-    /**
-     * @var string
-     * @Assert\NotNull())
-     */
+    #[Assert\NotNull]
     public string $keyword;
 }

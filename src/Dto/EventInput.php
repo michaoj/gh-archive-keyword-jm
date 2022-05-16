@@ -11,9 +11,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 
 class EventInput
 {
-    /**
-     * @Assert\Length(min=20)
-     */
+    #[Assert\Length(min: 20)]
     public ?string $comment;
 
     private ?array $decoded;
@@ -40,13 +38,13 @@ class EventInput
     public function getEvent(): Event
     {
         return new Event(
-                $this->decoded['id'],
-                $this->getType(),
-                $this->actor,
-                $this->repo,
-                $this->decoded['payload'],
-                new DateTimeImmutable($this->decoded['created_at']),
-                ''
+            $this->decoded['id'],
+            $this->getType(),
+            $this->actor,
+            $this->repo,
+            $this->decoded['payload'],
+            new DateTimeImmutable($this->decoded['created_at']),
+            ''
         );
     }
 
