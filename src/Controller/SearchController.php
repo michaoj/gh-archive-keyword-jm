@@ -14,20 +14,13 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 class SearchController
 {
-    private ReadEventRepository $repository;
-    private SerializerInterface $serializer;
-
     public function __construct(
-        ReadEventRepository $repository,
-        SerializerInterface  $serializer
+        private ReadEventRepository $repository,
+        private SerializerInterface  $serializer
     ) {
-        $this->repository = $repository;
-        $this->serializer = $serializer;
     }
 
-    /**
-     * @Route(path="/api/search", name="api_search", methods={"GET"})
-     */
+    #[Route('/api/search', name: 'api_search', methods: ['GET'])]
     public function searchCommits(Request $request, ValidatorInterface $validator): JsonResponse
     {
         /** @phpstan-ignore-next-line */
