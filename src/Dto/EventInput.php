@@ -6,8 +6,6 @@ use App\Entity\Actor;
 use App\Entity\Event;
 use App\Entity\EventType;
 use App\Entity\Repo;
-use App\Repository\DbalReadActorRepositoryInterface;
-use App\Repository\DbalReadRepoRepositoryInterface;
 use Monolog\DateTimeImmutable;
 use Symfony\Component\Validator\Constraints as Assert;
 
@@ -41,8 +39,7 @@ class EventInput
 
     public function getEvent(): Event
     {
-        try {
-            return new Event(
+        return new Event(
                 $this->decoded['id'],
                 $this->getType(),
                 $this->actor,
@@ -50,9 +47,7 @@ class EventInput
                 $this->decoded['payload'],
                 new DateTimeImmutable($this->decoded['created_at']),
                 ''
-            );
-        } catch (\Exception $e) {
-        }
+        );
     }
 
 

@@ -56,11 +56,11 @@ class EventFileHandler implements MessageHandlerInterface
 
             try {
                 $ev = json_decode($event, true, 512, JSON_THROW_ON_ERROR);
+                if (in_array($ev['type'], ['PushEvent', 'PullRequestEvent', 'CommitCommentEvent'])) {
+                    $this->bus->dispatch(new Event($event));
+                }
             } catch (\JsonException $e) {
                 $this->ghImportLogger->error($e->getMessage());
-            }
-            if (in_array($ev['type'], ['PushEvent', 'PullRequestEvent', 'CommitCommentEvent'])) {
-                $this->bus->dispatch(new Event($event));
             }
         }
         fclose($events);

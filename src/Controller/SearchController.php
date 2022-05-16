@@ -30,6 +30,7 @@ class SearchController
      */
     public function searchCommits(Request $request, ValidatorInterface $validator): JsonResponse
     {
+        /** @phpstan-ignore-next-line */
         $searchInput = $this->serializer->denormalize($request->query->all(), SearchInput::class);
 
         $errors = $validator->validate($searchInput);

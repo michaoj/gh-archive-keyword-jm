@@ -6,3 +6,4 @@ parameters:
 	excludePaths:
 		analyse:
 			- src/DataFixtures/*
+			- tests/Func/EventControllerTest.php

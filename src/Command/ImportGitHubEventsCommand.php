@@ -234,5 +234,6 @@ EOF
         } catch (\Exception $e) {
             $this->ghImportLogger->error($e->getMessage());
         }
+        return [];
     }
 }
