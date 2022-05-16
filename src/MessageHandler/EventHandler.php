@@ -8,7 +8,7 @@ use App\Repository\DbalReadActorRepositoryInterface;
 use App\Repository\DbalReadRepoRepositoryInterface;
 use App\Repository\DbalWriteEventRepository;
 use Psr\Log\LoggerInterface;
-use Symfony\Component\Messenger\Handler\MessageHandlerInterface;
+use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
 /**
  * Class EventHandler
@@ -17,27 +17,18 @@ use Symfony\Component\Messenger\Handler\MessageHandlerInterface;
  * @package  App\MessageHandler
  * @author   Joachim Martin <joachim.martin@emilfrey.fr>
  */
-class EventHandler implements MessageHandlerInterface
+#[AsMessageHandler]
+class EventHandler
 {
-    private DbalReadActorRepositoryInterface $actorRepository;
-    private DbalReadRepoRepositoryInterface  $repoRepository;
-    private DbalWriteEventRepository         $eventRepository;
-    private LoggerInterface                  $ghImportLogger;
-
     public function __construct(
-        DbalReadActorRepositoryInterface $actorRepository,
-        DbalReadRepoRepositoryInterface  $repoRepository,
-        DbalWriteEventRepository         $eventRepository,
-        LoggerInterface                  $ghImportLogger
-    )
-    {
-        $this->actorRepository = $actorRepository;
-        $this->repoRepository = $repoRepository;
-        $this->eventRepository = $eventRepository;
-        $this->ghImportLogger = $ghImportLogger;
+        private DbalReadActorRepositoryInterface $actorRepository,
+        private DbalReadRepoRepositoryInterface  $repoRepository,
+        private DbalWriteEventRepository         $eventRepository,
+        private LoggerInterface                  $ghImportLogger
+    ) {
     }
 
-    public function __invoke(Event $event)
+    public function __invoke(Event $event): void
     {
         try {
             $ev = json_decode($event->getContent(), true, 512, JSON_THROW_ON_ERROR);

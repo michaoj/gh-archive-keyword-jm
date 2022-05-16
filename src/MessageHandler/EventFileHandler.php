@@ -5,7 +5,7 @@ namespace App\MessageHandler;
 use App\Message\Event;
 use App\Message\EventFile;
 use Psr\Log\LoggerInterface;
-use Symfony\Component\Messenger\Handler\MessageHandlerInterface;
+use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Process\Exception\ProcessFailedException;
 use Symfony\Component\Process\Process;
@@ -17,21 +17,16 @@ use Symfony\Component\Process\Process;
  * @package  App\MessageHandler
  * @author   Joachim Martin <joachim.martin@emilfrey.fr>
  */
-class EventFileHandler implements MessageHandlerInterface
+#[AsMessageHandler]
+class EventFileHandler
 {
-    private MessageBusInterface $bus;
-    private LoggerInterface     $ghImportLogger;
-
     public function __construct(
-        MessageBusInterface $bus,
-        LoggerInterface     $ghImportLogger
-    )
-    {
-        $this->bus = $bus;
-        $this->ghImportLogger = $ghImportLogger;
+        private MessageBusInterface $bus,
+        private LoggerInterface     $ghImportLogger
+    ) {
     }
 
-    public function __invoke(EventFile $eventFile)
+    public function __invoke(EventFile $eventFile): void
     {
         $currentFile = $eventFile->getContent();
         $process = new Process(['gunzip', $currentFile]);
