@@ -11,13 +11,10 @@ use phpDocumentor\Reflection\DocBlock\Tags\Author;
 
 class DbalWriteEventRepository implements WriteEventRepository
 {
-    private Connection             $connection;
-    private EntityManagerInterface $entityManager;
-
-    public function __construct(Connection $connection, EntityManagerInterface $entityManager)
-    {
-        $this->connection = $connection;
-        $this->entityManager = $entityManager;
+    public function __construct(
+        private Connection $connection,
+        private EntityManagerInterface $entityManager
+    ) {
     }
 
     public function update(EventInput $authorInput, int $id): void

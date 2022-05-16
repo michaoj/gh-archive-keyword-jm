@@ -14,12 +14,9 @@ use Doctrine\ORM\EntityManagerInterface;
  */
 class DbalReadActorRepository implements DbalReadActorRepositoryInterface
 {
-    private EntityManagerInterface $entityManager;
-
-    public function __construct(EntityManagerInterface $entityManager)
-    {
-
-        $this->entityManager = $entityManager;
+    public function __construct(
+        private EntityManagerInterface $entityManager
+    ) {
     }
 
     public function findOneById(array $actor): Actor

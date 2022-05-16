@@ -14,11 +14,9 @@ use Doctrine\ORM\EntityManagerInterface;
  */
 class DbalReadRepoRepository implements DbalReadRepoRepositoryInterface
 {
-    private EntityManagerInterface $entityManager;
-
-    public function __construct(EntityManagerInterface $entityManager)
-    {
-        $this->entityManager = $entityManager;
+    public function __construct(
+        private EntityManagerInterface $entityManager
+    ) {
     }
 
     public function findOneById(array $repo): Repo
