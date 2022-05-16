@@ -9,6 +9,7 @@ use DateInterval;
 use DatePeriod;
 use DateTime;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Exception\InvalidArgumentException;
 use Symfony\Component\Console\Input\InputArgument;
@@ -29,46 +30,37 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
  * This command must import GitHub events.
  * You can add the parameters and code you want in this command to meet the need.
  */
+#[AsCommand(
+    name: 'app:import-github-events',
+    description: 'Import GH events'
+)]
 class ImportGitHubEventsCommand extends Command
 {
-    protected static            $defaultName = 'app:import-github-events';
-    private HttpClientInterface $ghClient;
-    private LoggerInterface     $ghImportLogger;
-    private ValidatorInterface  $validator;
-    private KernelInterface     $kernel;
     private const IMPORT_PATH = '/var/import';
-    private MessageBusInterface $bus;
 
     public function __construct(
-        HttpClientInterface $ghClient,
-        LoggerInterface $ghImportLogger,
-        ValidatorInterface $validator,
-        KernelInterface $kernel,
-        MessageBusInterface $bus,
+        private HttpClientInterface $ghClient,
+        private LoggerInterface $ghImportLogger,
+        private ValidatorInterface $validator,
+        private KernelInterface $kernel,
+        private MessageBusInterface $bus,
         string $name = null
-    )
-    {
+    ) {
         parent::__construct($name);
-        $this->ghClient = $ghClient;
-        $this->ghImportLogger = $ghImportLogger;
-        $this->validator = $validator;
-        $this->kernel = $kernel;
-        $this->bus = $bus;
     }
 
     protected function configure(): void
     {
         $this
-            ->setDescription('Import GH events')
             ->addArgument(
-                'start',
-                InputArgument::REQUIRED,
-                'Mandatory interval start <comment>(format YYYY-MM-DD)</comment>'
+                name: 'start',
+                mode: InputArgument::REQUIRED,
+                description:'Mandatory interval start <comment>(format YYYY-MM-DD)</comment>'
             )
             ->addArgument(
-                'end',
-                InputArgument::OPTIONAL,
-                'Optional interval end <comment>(format YYYY-MM-DD)</comment>'
+                name: 'end',
+                mode: InputArgument::OPTIONAL,
+                description: 'Optional interval end <comment>(format YYYY-MM-DD)</comment>'
             )
             ->setHelp(<<<'EOF'
 The <info>%command.name%</info> command performs parallel curl calls to the github events archive data 
@@ -130,8 +122,8 @@ EOF
         }
 
         $this->ghImportLogger->info(
-            'Starting import for interval',
-            [
+            message: 'Starting import for interval',
+            context: [
                 'start' => $start,
                 'end' => $end
             ]
@@ -151,17 +143,23 @@ EOF
                 $style->comment(sprintf('Downloading %s ...', $uri));
                 // Check if file exists
                 if (!$fs->exists($fullImportPath . $uri)) {
-                    $this->ghImportLogger->info('Downloading file', ['currentFile' => $uri]);
+                    $this->ghImportLogger->info(
+                        message: 'Downloading file',
+                        context: ['currentFile' => $uri]
+                    );
                     $filesToDownload++;
                     $responses[] = $this->ghClient->request(
-                        'GET',
-                        $uri,
-                        [
+                        method: 'GET',
+                        url: $uri,
+                        options: [
                             'user_data' => $fullImportPath . $uri
                         ]
                     );
                 } else {
-                    $this->ghImportLogger->warning('The file has already been downloaded', ['currentFile' => $currentFile]);
+                    $this->ghImportLogger->warning(
+                        message: 'The file has already been downloaded',
+                        context: ['currentFile' => $currentFile]
+                    );
                 }
             }
         }
@@ -169,16 +167,30 @@ EOF
         try {// now loop over the responses and process the returns by chunk, thus we will avoid memory errors on large file
             foreach ($this->ghClient->stream($responses) as $response => $chunk) {
                 if ($chunk->isFirst()) {
-                    $this->ghImportLogger->info('Saving file to disk', ['currentFile' => $response->getInfo('user_data')]);
+                    $this->ghImportLogger->info(
+                        message: 'Saving file to disk',
+                        context: ['currentFile' => $response->getInfo('user_data')]
+                    );
                 } elseif ($chunk->isLast()) {
                     $filesDownloaded++;
                     $style->success(sprintf('Completed download to %s', $response->getInfo('user_data')));
-                    file_put_contents($response->getInfo('user_data'), $chunk->getContent(), FILE_APPEND);
-                    $this->ghImportLogger->info('File saved', ['currentFile' => $response->getInfo('user_data')]);
+                    file_put_contents(
+                        filename: $response->getInfo('user_data'),
+                        data: $chunk->getContent(),
+                        flags: FILE_APPEND
+                    );
+                    $this->ghImportLogger->info(
+                        message: 'File saved',
+                        context: ['currentFile' => $response->getInfo('user_data')]
+                    );
                     $this->bus->dispatch(new EventFile($response->getInfo('user_data')));
                 } else {
                     // Add new piece of the file
-                    file_put_contents($response->getInfo('user_data'), $chunk->getContent(), FILE_APPEND);
+                    file_put_contents(
+                        filename: $response->getInfo('user_data'),
+                        data: $chunk->getContent(),
+                        flags: FILE_APPEND
+                    );
                 }
             }
         } catch (TransportExceptionInterface $e) {
@@ -190,8 +202,8 @@ EOF
         if ($filesToDownload === $filesDownloaded) {
             $style->success($returnMessage);
             $this->ghImportLogger->info(
-                'Import completed',
-                [
+                message: 'Import completed',
+                context: [
                     'message' => $returnMessage,
                 ]
             );
