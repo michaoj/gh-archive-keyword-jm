@@ -81,7 +81,13 @@
         }
     },
     "require-dev": {
+        "behat/behat": "^3.10",
         "doctrine/doctrine-fixtures-bundle": "^3.4",
+        "friends-of-behat/mink": "^1.10",
+        "friends-of-behat/mink-browserkit-driver": "^1.6",
+        "friends-of-behat/mink-extension": "^2.6",
+        "friends-of-behat/symfony-extension": "^2.3",
+        "imbo/behat-api-extension": "^3.0",
         "liip/functional-test-bundle": "^4.0.0",
         "liip/test-fixtures-bundle": "^2.0.0",
         "phpstan/phpstan": "^1.6",

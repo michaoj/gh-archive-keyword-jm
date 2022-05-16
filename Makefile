@@ -26,6 +26,7 @@ CURRENT_GROUP := $(shell id -g)
 TTY   := $(shell tty -s || echo '-T')
 DOCKER_COMPOSE := FIXUID=$(CURRENT_USER) FIXGID=$(CURRENT_GROUP) docker-compose
 PHP_RUN := $(DOCKER_COMPOSE) run $(TTY) --no-deps --rm php
+PHP_RUN_TEST := $(DOCKER_COMPOSE) run $(TTY) -env SYMFONY_ENV=test --env APP_ENV=test --no-deps --rm php
 PHP_EXEC := $(DOCKER_COMPOSE) exec $(TTY) php
 
 .DEFAULT_GOAL := help
@@ -114,3 +115,8 @@ func-test: var/docker.up ## Run PhpUnit functional testsuite
 phpstan: var/docker.up ## Run PHPStan static analysis (Use with path=path/to/file to restrict the scope)
 	@$(call log,Static analysis ...)
 	@$(PHP_RUN) vendor/bin/phpstan analyse -c phpstan.neon $(path)
+
+.PHONY: behat
+behat: var/docker.up
+	@$(call log,Running behat ...)
+	@$(PHP_RUN) 	 vendor/bin/behat
