@@ -1,4 +1,4 @@
-FROM php:7.4-fpm-alpine3.13
+FROM php:8.0-fpm-alpine3.15
 
 # Install composer
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
@@ -26,8 +26,10 @@ RUN \
 RUN apk add --no-cache make
 
 # Install php extensions
-RUN apk add --no-cache postgresql-dev bash \
-    && docker-php-ext-install -j$(nproc) pdo_pgsql
+RUN apk add --no-cache $PHPIZE_DEPS postgresql-dev bash rabbitmq-c rabbitmq-c-dev\
+    && pecl install amqp \
+    && docker-php-ext-install -j$(nproc) pdo_pgsql \
+    && docker-php-ext-enable amqp
 
 USER docker:docker
 
