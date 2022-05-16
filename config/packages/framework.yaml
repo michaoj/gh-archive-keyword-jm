@@ -19,7 +19,7 @@ framework:
 
     http_client:
         scoped_clients:
-            github.client:
+            gh.client:
                 base_uri: 'https://data.gharchive.org'
                 headers:
                     Accept: 'application/gzip'
