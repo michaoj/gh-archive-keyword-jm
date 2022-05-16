@@ -26,8 +26,10 @@ RUN \
 RUN apk add --no-cache make
 
 # Install php extensions
-RUN apk add --no-cache postgresql-dev bash \
-    && docker-php-ext-install -j$(nproc) pdo_pgsql
+RUN apk add --no-cache $PHPIZE_DEPS postgresql-dev bash rabbitmq-c rabbitmq-c-dev\
+    && pecl install amqp \
+    && docker-php-ext-install -j$(nproc) pdo_pgsql \
+    && docker-php-ext-enable amqp
 
 USER docker:docker
 

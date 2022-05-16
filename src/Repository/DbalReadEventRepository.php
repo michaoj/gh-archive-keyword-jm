@@ -19,12 +19,13 @@ class DbalReadEventRepository implements ReadEventRepository
         $sql = <<<SQL
         SELECT sum(count) as count
         FROM event
-        WHERE date(create_at) = :date
-        AND payload like %{$searchInput->keyword}%
+        WHERE date(create_at)::date = :date
+        AND payload::text like :keyword
 SQL;
 
         return (int) $this->connection->fetchOne($sql, [
-            'date' => $searchInput->date
+            'date' => $searchInput->date->format('Y-m-d'),
+            'keyword' => '%' . $searchInput->keyword . '%'
         ]);
     }
 
@@ -33,13 +34,14 @@ SQL;
         $sql = <<<'SQL'
             SELECT type, sum(count) as count
             FROM event
-            WHERE date(create_at) = :date
-            AND payload like %{$searchInput->keyword}%
+            WHERE date(create_at)::date = :date
+            AND payload::text like :keyword
             GROUP BY type
 SQL;
 
         return $this->connection->fetchAllKeyValue($sql, [
-            'date' => $searchInput->date
+            'date' => $searchInput->date->format('Y-m-d'),
+            'keyword' => '%' . $searchInput->keyword . '%'
         ]);
     }
 
@@ -48,13 +50,14 @@ SQL;
         $sql = <<<SQL
             SELECT extract(hour from create_at) as hour, type, sum(count) as count
             FROM event
-            WHERE date(create_at) = :date
-            AND payload like %{$searchInput->keyword}%
+            WHERE date(create_at)::date = :date
+            AND payload::text like :keyword
             GROUP BY TYPE, EXTRACT(hour from create_at)
 SQL;
 
-        $stats = $this->connection->fetchAll($sql, [
-            'date' => $searchInput->date
+        $stats = $this->connection->fetchAllAssociative($sql, [
+            'date' => $searchInput->date->format('Y-m-d'),
+            'keyword' => '%' . $searchInput->keyword . '%'
         ]);
 
         $data = array_fill(0, 24, ['commit' => 0, 'pullRequest' => 0, 'comment' => 0]);
@@ -69,19 +72,24 @@ SQL;
     public function getLatest(SearchInput $searchInput): array
     {
         $sql = <<<SQL
-            SELECT type, repo
-            FROM event
-            WHERE date(create_at) = :date
-            AND payload like %{$searchInput->keyword}%
+            SELECT e.type, r.name as repo, r.url
+            FROM event e 
+            LEFT JOIN repo r on e.repo_id =r.id
+            WHERE date(e.create_at)::date = :date
+            AND e.payload::text like :keyword
 SQL;
 
         $result = $this->connection->fetchAllAssociative($sql, [
-            'date' => $searchInput->date,
-            'keyword' => $searchInput->keyword,
+            'date' => $searchInput->date->format('Y-m-d'),
+            'keyword' => '%' . $searchInput->keyword . '%'
         ]);
 
         $result = array_map(static function($item) {
-            $item['repo'] = json_decode($item['repo'], true);
+            $item['repo'] = [
+                'name' => $item['repo'],
+                'url'  => $item['url']
+            ];
+            unset($item['repo']);
 
             return $item;
         }, $result);

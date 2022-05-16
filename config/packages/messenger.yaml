@@ -1,0 +1,34 @@
+framework:
+    messenger:
+        # reset services after consuming messages
+        reset_on_message: true
+
+        # Uncomment this (and the failed transport below) to send failed messages to this transport for later handling.
+        # failure_transport: failed
+
+        transports:
+            # https://symfony.com/doc/current/messenger.html#transport-configuration
+            #async: '%env(MESSENGER_TRANSPORT_DSN)%'
+            new_github_archive_file:
+                dsn: '%env(MESSENGER_TRANSPORT_DSN)%'
+                options:
+                    exchange:
+                        name: 'new_github_archive_file'
+                        type: direct
+                    queues:
+                        'new_github_archive_file': ~
+            new_github_event:
+                dsn: '%env(MESSENGER_TRANSPORT_DSN)%'
+                options:
+                    exchange:
+                        name: 'new_github_event'
+                        type: direct
+                    queues:
+                        'new_github_event': ~
+            # failed: 'doctrine://default?queue_name=failed'
+            # sync: 'sync://'
+
+        routing:
+            # Route your messages to the transports
+            'App\Message\Event': new_github_event
+            'App\Message\EventFile': new_github_archive_file

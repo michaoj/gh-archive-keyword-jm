@@ -1,0 +1,14 @@
+default:
+    suites:
+        default:
+            contexts:
+                - Behat\MinkExtension\Context\MinkContext
+                - Imbo\BehatApiExtension\Context\ApiContext
+
+    extensions:
+        FriendsOfBehat\SymfonyExtension:
+            kernel:
+                environment: test
+        Imbo\BehatApiExtension:
+              apiClient:
+                base_uri: http://php:8000
